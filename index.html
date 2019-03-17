@@ -19,7 +19,7 @@
         $(function(){
             Game.init();
             $("<button>").on('click', function(){Game.player.Attack()});
-            $(".character").on('click', function(){Game.choose(this.id)});
+            $(".character").on('click', function(){Game.choose($(this).attr("id"))});
         });
     </script>
 </body>

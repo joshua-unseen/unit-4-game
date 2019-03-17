@@ -40,18 +40,18 @@ var Game = {
             aP: 8,
         },
         {
-            name: "Darth Vader",
+            name: "Darth_Vader",
             hP: 22,
             aP: 16,
         },
         {
-            name: "Darth Sidious",
+            name: "Darth_Sidious",
             hP: 24,
             aP: 18,
         }
     ],
     player: "",
-    opponent: "",
+    enemy: "",
 
     // Methods:
     init(){
@@ -69,19 +69,28 @@ var Game = {
     choose(choice){
         // if player has been chosen, choose opponent
         if (this.player) {
-            this.opponent = $("#"+choice);
-            this.opponent.toggleClass("opponent character");
-            $("#waiting").remove(this.opponent);
-            $("#enemy").append(this.opponent);
+        //     this.opponent.toggleClass("opponent character");
+        //     this.opponent.off("click");
+        //     $("#enemy").append(this.opponent);
+        //     $(".character").css("display", "none");
+            this.enemy = this.muster("enemy", choice);
+            $(".character").css("display", "none");
         }
         // else, choose player
         else {
-            this.player = $("#"+choice);
-            this.player.toggleClass("player character");
-            $("#waiting").remove(this.player);
-            $("#player").append(this.player);
+            this.player = this.muster("player", choice);
+            // this.player = $("#"+choice);
+            // this.player.toggleClass("player character");
+            // $("#player").append(this.player);
         }
     },
+    muster(designate, choice){
+        var kludge = $("#"+choice);
+        kludge.toggleClass(designate+" character");
+        kludge.off("click");
+        $("#"+designate).append(kludge);
+        return kludge;
+},
     win(){},
     lose(){},
 
