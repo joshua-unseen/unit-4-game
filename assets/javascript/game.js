@@ -50,11 +50,15 @@ var Game = {
             aP: 18,
         }
     ],
-    player: "",
-    enemy: "",
+    player: {
+        webClass: "player",
+    },
+    enemy: {
+        webClass: "enemy",
+    },
 
     // Methods:
-    init(){
+    Init(){
         for (i=0; i < this.bathrobeWizards.length; i++){
             var dudeDiv = $("<div>",{
                 "id": this.bathrobeWizards[i].name,
@@ -66,32 +70,58 @@ var Game = {
             $("#waiting").append(dudeDiv);
         }
     },
-    choose(choice){
+    Choose(choice){
         // if player has been chosen, choose opponent
-        if (this.player) {
-        //     this.opponent.toggleClass("opponent character");
-        //     this.opponent.off("click");
-        //     $("#enemy").append(this.opponent);
-        //     $(".character").css("display", "none");
-            this.enemy = this.muster("enemy", choice);
+        if (this.player.name) {
+            this.Muster(this.enemy, choice);
             $(".character").css("display", "none");
         }
         // else, choose player
         else {
-            this.player = this.muster("player", choice);
-            // this.player = $("#"+choice);
-            // this.player.toggleClass("player character");
-            // $("#player").append(this.player);
+            this.Muster(this.player, choice);
+            this.player.baseAP = this.player.aP;
         }
     },
-    muster(designate, choice){
-        var kludge = $("#"+choice);
-        kludge.toggleClass(designate+" character");
+    // Muster() sets the new .class for the choice, turns off the event listener, and moves it to its new div
+    Muster(designate, choice){
+        $.extend(designate, this.bathrobeWizards.find(dude => dude.name === choice));
+        var kludge = $("#"+designate.name);
+        kludge.toggleClass(designate.webClass+" character");
         kludge.off("click");
-        $("#"+designate).append(kludge);
-        return kludge;
-},
-    win(){},
-    lose(){},
+        $("#"+designate.webClass).append(kludge);
+        designate.webDiv = kludge;
+        // return kludge;
+    },
+    Attack(attacker, defender){
+        this.Ouch(defender, attacker.aP);
+        if (attacker === this.player){
+            this.player.aP += this.player.baseAP;
+        }
+    },
+    // Counter(){
+    //     this.Ouch(this.player, this.enemy.aP)
+    // },
+    Ouch(combatant, hit){
+        combatant.hP -= hit;
+        if (combatant.hP <= 0){
+            Die(combatant);
+        }
+        else if (combatant === this.enemy) {
+            Attack(this.enemy, this.player);
+        }
+    },
+    Die(deadGuy){
 
+        if (deadGuy === this.player) {  // you died.  Sad.
+            this.Lose();
+        }
+        else if ($(".character").length){   // find me someone else to fight!
+            $(".character").css("display", "initial");
+        }
+        else {  // no more enemies to kill. You win!
+            this.Win();
+        }
+    },
+    Win(){},
+    Lose(){},
 }
