@@ -1,0 +1,8 @@
+.character {
+    display: inline-block;
+    margin: 5px;
+    background: black;
+    color: azure;
+    width: 200px;
+    height: 200px;
+}
