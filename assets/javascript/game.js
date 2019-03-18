@@ -1,127 +1,153 @@
-/* Characters as objects: (make a class, maybe?)
-{
-name:
-hP:
-aP:
-Attack() {
-    only called if this is the player.
-    calls opponent.Ouch(this.aP)
-    doubles this.aP
-}
-CAttack() {
-    only called if this is not the player.
-    calls opponent.Ouch(this.aP)
-}
-Ouch(hit) {
-    decrement this.hP by hit
-    if hp <= 0, call Die()
-    else if this is not the player, call CAttack().
-},
-Die() {
-    if this is the player, end the game with a loss.
-    else, remove this opponent and go back to 'choose opponent' prompt.
-},
-}
+/*
+    Character backgrounds start white.
+    Player background stays white,
+    Waiting enemies' backgrounds turn red.
+    Chosen enemy background turns black.
+    Borders are green
+
 */
 
 /* Game object */
 var Game = {
     // variables:
-    // characters array
     bathrobeWizards: [
         {
-            name: "Luke",
-            hP: 12,
-            aP: 4,
-        },
-        {
-            name: "Obi-Wan",
-            hP: 16,
+            id: "skywalker",
+            name: "Luke Skywalker",
+            hP: 100,
             aP: 8,
         },
         {
-            name: "Darth_Vader",
-            hP: 22,
-            aP: 16,
+            id: "kenobi",
+            name: "Obi-Wan Kenobi",
+            hP: 120,
+            aP: 12,
         },
         {
-            name: "Darth_Sidious",
-            hP: 24,
-            aP: 18,
+            id: "vader",
+            name: "Darth Vader",
+            hP: 200,
+            aP: 20,
+        },
+        {
+            id: "sidious",
+            name: "Darth Sidious",
+            hP: 140,
+            aP: 25,
         }
     ],
+
     player: {
         webClass: "player",
     },
+
     enemy: {
         webClass: "enemy",
     },
 
     // Methods:
-    Init(){
-        for (i=0; i < this.bathrobeWizards.length; i++){
-            var dudeDiv = $("<div>",{
-                "id": this.bathrobeWizards[i].name,
-                "hit-points": this.bathrobeWizards[i].hP,
-                "attack-power": this.bathrobeWizards[i].aP,
+    Init() {
+        for (i = 0; i < this.bathrobeWizards.length; i++) {
+            // I may try to store everything in the jQuery object, rather than making it a part of a game object.
+            var dudeDiv = $("<div>", {
+                "id": this.bathrobeWizards[i].id,
+                // "hit-points": this.bathrobeWizards[i].hP,
+                // "attack-power": this.bathrobeWizards[i].aP,
                 "class": "character",
-                "html": this.bathrobeWizards[i].name + "<br>Health " + this.bathrobeWizards[i].hP
+                "html": "<p class=\"name\">"
+                    + this.bathrobeWizards[i].name + "</p>"
+                    + "<p  class=\"hit-points\">"
+                    + this.bathrobeWizards[i].hP + "</p>"
             });
             $("#waiting").append(dudeDiv);
         }
     },
-    Choose(choice){
+
+    Choose(choice) {
+        if (this.player.name && this.enemy.name) {
+            // don't do anything if both exist
+            return;
+        }
         // if player has been chosen, choose opponent
-        if (this.player.name) {
+        else if (this.player.name) {
             this.Muster(this.enemy, choice);
-            $(".character").css("display", "none");
+            $(".enemy").css("background", "black");
+            $("#wait-title").text("Enemies waiting");
+            // $("#waiting").css("display", "none");
         }
         // else, choose player
         else {
             this.Muster(this.player, choice);
             this.player.baseAP = this.player.aP;
+            $(".character").css("background", "red");
+            $("#wait-title").text("Choose an Enemy");
         }
     },
+
     // Muster() sets the new .class for the choice, turns off the event listener, and moves it to its new div
-    Muster(designate, choice){
-        $.extend(designate, this.bathrobeWizards.find(dude => dude.name === choice));
-        var kludge = $("#"+designate.name);
-        kludge.toggleClass(designate.webClass+" character");
+    Muster(designate, choice) {
+        $.extend(designate, this.bathrobeWizards.find(dude => dude.id === choice));
+        var kludge = $("#" + designate.id);
+        kludge.toggleClass(designate.webClass + " character");
         kludge.off("click");
-        $("#"+designate.webClass).append(kludge);
+        $("#" + designate.webClass).append(kludge);
         designate.webDiv = kludge;
         // return kludge;
     },
-    Attack(attacker, defender){
-        this.Ouch(defender, attacker.aP);
-        if (attacker === this.player){
-            this.player.aP += this.player.baseAP;
+
+    Attack(attacker, defender) {
+        if (defender.name) {
+            this.Ouch(defender, attacker.aP);
+            if (attacker === this.player) {
+                this.player.aP += this.player.baseAP;
+            }
         }
     },
+
     // Counter(){
     //     this.Ouch(this.player, this.enemy.aP)
     // },
-    Ouch(combatant, hit){
+
+    Ouch(combatant, hit) {
         combatant.hP -= hit;
-        if (combatant.hP <= 0){
-            Die(combatant);
+        $(combatant.webDiv).find(".hit-points").text(combatant.hP);
+        if (combatant.hP <= 0) {
+            this.Die(combatant);
         }
         else if (combatant === this.enemy) {
-            Attack(this.enemy, this.player);
+            $("#status").html("<p>You hit " + combatant.name + " for " + hit + "</p>");
+            this.Attack(this.enemy, this.player);
+        }
+        else {
+            $("#status").append("<p>" + this.enemy.name + " hit you for " + hit + "</p>");
         }
     },
-    Die(deadGuy){
+
+    Die(deadGuy) {
 
         if (deadGuy === this.player) {  // you died.  Sad.
             this.Lose();
         }
-        else if ($(".character").length){   // find me someone else to fight!
-            $(".character").css("display", "initial");
-        }
-        else {  // no more enemies to kill. You win!
-            this.Win();
+        else {
+            $("#status").html("<p>You have defeated " + deadGuy.name + "</p><p>Select another opponent")
+            this.enemy = {
+                webClass: "enemy",
+            };
+            $("#enemy").empty();
+            $("#wait-title").text("Choose an Enemy");
+            if ($(".character").length === 0) {   // no more enemies to kill. You win!
+                this.Win();
+            }
         }
     },
-    Win(){},
-    Lose(){},
+
+    Win() {
+        $("#status").click(function () { location.reload() });
+        $("#status").html("<p>You have triumphed over your foes</p><p>Click here to fight again</p>");
+    },
+
+    Lose() {
+        $("#status").click(function () { location.reload() });
+        $("#status").html("<p>Your foes have defeated you</p><p>Click here to fight again</p>");
+    },
 }

@@ -10,16 +10,26 @@
     <title>unit-4-game</title>
 </head>
 <body>
-    <div id="waiting"></div>
     <div id="player"></div>
+    <div id="waiting">
+        <h1 id="wait-title">Pick Your Fighter</h1>
+    </div>
+    <div id="fight">
+        <button>Attack</button>
+    </div>
     <div id="enemy"></div>
+    <div id="status"></div>
 
     <script src="assets/javascript/game.js"></script>
     <script>
         $(function(){
             Game.Init();
-            $("<button>").on('click', function(){Game.Attack(this.player, this.enemy)});
-            $(".character").on('click', function(){Game.Choose($(this).attr("id"))});
+            $("button").on('click', function(){
+                Game.Attack(Game.player, Game.enemy);
+            });
+            $(".character").on('click', function(){
+                Game.Choose($(this).attr("id"));
+            });
         });
     </script>
 </body>

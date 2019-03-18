@@ -1,8 +1,13 @@
 .character, .player, .enemy {
     display: inline-block;
     margin: 5px;
-    background: black;
-    color: azure;
+    border: 2px solid greenyellow;
+    /* color: azure; */
     width: 200px;
-    height: 200px;
+    height: 160px;
+}
+
+.enemy {
+    background: black;
+    color: white;
 }
