@@ -5,6 +5,8 @@
     Chosen enemy background turns black.
     Borders are green
 
+    If a div is empty, hide it.
+    Ideally, auto-move the last enemy from #waiting to #enemy
 */
 
 /* Game object */
@@ -15,7 +17,7 @@ var Game = {
             id: "skywalker",
             name: "Luke Skywalker",
             hP: 100,
-            aP: 8,
+            aP: 10,
         },
         {
             id: "kenobi",
@@ -26,8 +28,8 @@ var Game = {
         {
             id: "vader",
             name: "Darth Vader",
-            hP: 200,
-            aP: 20,
+            hP: 180,
+            aP: 18,
         },
         {
             id: "sidious",
@@ -44,9 +46,11 @@ var Game = {
     enemy: {
         webClass: "enemy",
     },
-
+    
     // Methods:
     Init() {
+        // $("#player").animate({height: "toggle"}, 0);
+        // $("#enemy").animate({height: "toggle"}, 0);
         for (i = 0; i < this.bathrobeWizards.length; i++) {
             // I may try to store everything in the jQuery object, rather than making it a part of a game object.
             var dudeDiv = $("<div>", {
@@ -57,7 +61,7 @@ var Game = {
                 "html": "<p class=\"name\">"
                     + this.bathrobeWizards[i].name + "</p>"
                     + "<p  class=\"hit-points\">"
-                    + this.bathrobeWizards[i].hP + "</p>"
+                    + this.bathrobeWizards[i].hP + "</p>",
             });
             $("#waiting").append(dudeDiv);
         }
@@ -71,15 +75,19 @@ var Game = {
         // if player has been chosen, choose opponent
         else if (this.player.name) {
             this.Muster(this.enemy, choice);
+            $("#enemy").animate({height: "toggle"});
+            $("button").animate({width: "toggle"});
             $(".enemy").css("background", "black");
             $("#wait-title").text("Enemies waiting");
+            $("#status").empty();
             // $("#waiting").css("display", "none");
         }
         // else, choose player
         else {
             this.Muster(this.player, choice);
+            $("#player").animate({height: "toggle"});
             this.player.baseAP = this.player.aP;
-            $(".character").css("background", "red");
+            $(".character").toggleClass("character inWait");
             $("#wait-title").text("Choose an Enemy");
         }
     },
@@ -88,9 +96,10 @@ var Game = {
     Muster(designate, choice) {
         $.extend(designate, this.bathrobeWizards.find(dude => dude.id === choice));
         var kludge = $("#" + designate.id);
-        kludge.toggleClass(designate.webClass + " character");
+        var kludgeClass = $(kludge).attr("class");
+        kludge.toggleClass(designate.webClass + " "+kludgeClass);
         kludge.off("click");
-        $("#" + designate.webClass).append(kludge);
+        $("#" + designate.webClass).append(kludge); // Yes, the div they go into has the same id as their class.
         designate.webDiv = kludge;
         // return kludge;
     },
@@ -115,11 +124,14 @@ var Game = {
             this.Die(combatant);
         }
         else if (combatant === this.enemy) {
-            $("#status").html("<p>You hit " + combatant.name + " for " + hit + "</p>");
+            $("#status").html("<p>You hit " 
+                + combatant.name + " for " 
+                + hit + "</p>");
             this.Attack(this.enemy, this.player);
         }
         else {
-            $("#status").append("<p>" + this.enemy.name + " hit you for " + hit + "</p>");
+            $("#status").append("<p>" + this.enemy.name 
+                + " hit you for " + hit + "</p>");
         }
     },
 
@@ -129,25 +141,37 @@ var Game = {
             this.Lose();
         }
         else {
-            $("#status").html("<p>You have defeated " + deadGuy.name + "</p><p>Select another opponent")
+            $("#enemy").animate({height: "toggle"});
+            $("button").animate({width: "toggle"});
+            $("#status").html("<p>You have defeated " + deadGuy.name 
+            + "</p><p>Select another opponent")
             this.enemy = {
                 webClass: "enemy",
             };
             $("#enemy").empty();
             $("#wait-title").text("Choose an Enemy");
-            if ($(".character").length === 0) {   // no more enemies to kill. You win!
+            var dudesWaiting = $("#waiting").children(".inWait");
+            if (dudesWaiting.length === 1) { //  Only one dude left.  Fight him!
+                $("#status").empty();
+                $("#waiting").animate({height: "toggle"});
+                this.Choose(dudesWaiting.attr("id"));
+            }
+            else if (dudesWaiting.length === 0) {   // no more enemies to kill. You win!
                 this.Win();
             }
         }
     },
-
+    
     Win() {
-        $("#status").click(function () { location.reload() });
-        $("#status").html("<p>You have triumphed over your foes</p><p>Click here to fight again</p>");
+        $("button").click(function () { location.reload() });
+        $("button").text("Reset");
+        $("button").animate({width: "toggle"});
+        $("#status").html("<p>You have triumphed over your foes</p>");
     },
 
     Lose() {
-        $("#status").click(function () { location.reload() });
-        $("#status").html("<p>Your foes have defeated you</p><p>Click here to fight again</p>");
+        $("button").click(function () { location.reload() });
+        $("button").text("Reset");
+        $("#status").html("<p>Your foes have defeated you</p>");
     },
 }

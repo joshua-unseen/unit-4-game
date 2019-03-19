@@ -1,4 +1,4 @@
-.character, .player, .enemy {
+.character, .player, .enemy, .inWait {
     display: inline-block;
     margin: 5px;
     border: 2px solid greenyellow;
@@ -7,7 +7,19 @@
     height: 160px;
 }
 
+.inWait {
+    background: red;
+}
+
 .enemy {
     background: black;
     color: white;
+}
+
+#player, #enemy {
+    display: none;
+}
+
+button {
+    display: none;
 }
