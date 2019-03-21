@@ -1,10 +1,37 @@
+html {
+    font-family: 'Nova Square', sans-serif;
+}
+
+body {
+    margin: 10px;
+    background: url(../images/background.jpg);
+}
+
+header {
+    text-align: right;
+}
+
+h1, h2 {
+    color: silver;
+    margin: 5px;
+}
+
+h1 {
+    font-size: 30pt;
+}
+h2 {
+    /* line-height: 1.5em; */
+    font-size: 16pt;
+}
 .character, .player, .enemy, .inWait {
+    background: white;
     display: inline-block;
     margin: 5px;
     border: 2px solid greenyellow;
     /* color: azure; */
     width: 200px;
     height: 160px;
+    text-align: center;
 }
 
 .inWait {
@@ -16,10 +43,17 @@
     color: white;
 }
 
-#player, #enemy {
+#player, #enemy, #fight {
     display: none;
+}
+#status {
+    color: silver;
 }
 
-button {
-    display: none;
-}
+/* Fonts to play with:
+font-family: 'Play', sans-serif;
+* font-family: 'Audiowide', cursive;
+font-family: 'Iceland', cursive;
+* font-family: 'Nova Square', cursive;
+font-family: 'Gugi', cursive;
+font-family: 'Geostar Fill', cursive; */

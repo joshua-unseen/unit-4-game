@@ -16,7 +16,7 @@ var Game = {
         {
             id: "skywalker",
             name: "Luke Skywalker",
-            hP: 100,
+            hP: 130,
             aP: 10,
         },
         {
@@ -49,17 +49,16 @@ var Game = {
     
     // Methods:
     Init() {
-        // $("#player").animate({height: "toggle"}, 0);
-        // $("#enemy").animate({height: "toggle"}, 0);
         for (i = 0; i < this.bathrobeWizards.length; i++) {
             // I may try to store everything in the jQuery object, rather than making it a part of a game object.
+            // Yeah, that didn't happen...
             var dudeDiv = $("<div>", {
                 "id": this.bathrobeWizards[i].id,
-                // "hit-points": this.bathrobeWizards[i].hP,
-                // "attack-power": this.bathrobeWizards[i].aP,
                 "class": "character",
                 "html": "<p class=\"name\">"
                     + this.bathrobeWizards[i].name + "</p>"
+                    + "<img src = \"assets/images/" + this.bathrobeWizards[i].id
+                    + ".jpg\" height = 120 width = 160>"
                     + "<p  class=\"hit-points\">"
                     + this.bathrobeWizards[i].hP + "</p>",
             });
@@ -75,8 +74,8 @@ var Game = {
         // if player has been chosen, choose opponent
         else if (this.player.name) {
             this.Muster(this.enemy, choice);
-            $("#enemy").animate({height: "toggle"});
-            $("button").animate({width: "toggle"});
+            this.AnimDiv("#enemy");
+            this.AnimDiv("#fight");
             $(".enemy").css("background", "black");
             $("#wait-title").text("Enemies waiting");
             $("#status").empty();
@@ -85,7 +84,7 @@ var Game = {
         // else, choose player
         else {
             this.Muster(this.player, choice);
-            $("#player").animate({height: "toggle"});
+            this.AnimDiv("#player");
             this.player.baseAP = this.player.aP;
             $(".character").toggleClass("character inWait");
             $("#wait-title").text("Choose an Enemy");
@@ -101,7 +100,6 @@ var Game = {
         kludge.off("click");
         $("#" + designate.webClass).append(kludge); // Yes, the div they go into has the same id as their class.
         designate.webDiv = kludge;
-        // return kludge;
     },
 
     Attack(attacker, defender) {
@@ -112,10 +110,6 @@ var Game = {
             }
         }
     },
-
-    // Counter(){
-    //     this.Ouch(this.player, this.enemy.aP)
-    // },
 
     Ouch(combatant, hit) {
         combatant.hP -= hit;
@@ -139,10 +133,11 @@ var Game = {
 
         if (deadGuy === this.player) {  // you died.  Sad.
             this.Lose();
+            this.AnimDiv("#fight");
         }
         else {
-            $("#enemy").animate({height: "toggle"});
-            $("button").animate({width: "toggle"});
+            this.AnimDiv("#enemy");
+            this.AnimDiv("#fight");
             $("#status").html("<p>You have defeated " + deadGuy.name 
             + "</p><p>Select another opponent")
             this.enemy = {
@@ -153,7 +148,7 @@ var Game = {
             var dudesWaiting = $("#waiting").children(".inWait");
             if (dudesWaiting.length === 1) { //  Only one dude left.  Fight him!
                 $("#status").empty();
-                $("#waiting").animate({height: "toggle"});
+                this.AnimDiv("#waiting");
                 this.Choose(dudesWaiting.attr("id"));
             }
             else if (dudesWaiting.length === 0) {   // no more enemies to kill. You win!
@@ -163,15 +158,24 @@ var Game = {
     },
     
     Win() {
-        $("button").click(function () { location.reload() });
-        $("button").text("Reset");
-        $("button").animate({width: "toggle"});
+        this.ResetIt();
         $("#status").html("<p>You have triumphed over your foes</p>");
     },
 
     Lose() {
-        $("button").click(function () { location.reload() });
-        $("button").text("Reset");
+        this.ResetIt();
         $("#status").html("<p>Your foes have defeated you</p>");
+    },
+
+    ResetIt() {
+        var theButton = $("button");
+        theButton.off("click");
+        theButton.click(function () { location.reload() });
+        theButton.text("Reset");
+        this.AnimDiv("#fight");
+    },
+
+    AnimDiv(theDiv){
+        $(theDiv).animate({height: "toggle"});
     },
 }
